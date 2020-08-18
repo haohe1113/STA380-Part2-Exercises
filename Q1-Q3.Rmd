@@ -1,0 +1,297 @@
+---
+title: 'STA 380: Exercises  - Ian Arzt'
+output:
+  html_document:
+    df_print: paged
+date: "8/17/20"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+**Question 1**
+
+```{r include = FALSE}
+library(ggplot2)
+greenbuildings <- read.csv('greenbuildings.csv')
+attach(greenbuildings)
+
+eco <- subset(greenbuildings, green_rating == 1  & 
+                leasing_rate > 10)
+
+non_eco <- subset(greenbuildings, green_rating == 0 & 
+                    leasing_rate > 10)
+
+ngmean_rent <- round(mean(non_eco$Rent), 2)
+```
+```{r}
+ggplot(data = non_eco, aes(x=cluster_rent, y=Rent)) + 
+  geom_point(color = 'black') + 
+  geom_smooth(se=FALSE, color = 'red') + 
+  labs(
+    x = 'Cluster Rent', 
+    y = 'Rent', 
+    title = 'Rent vs. Cluster Rent on Non-Green Buildings') +
+  annotate("text", x = 30, y = 225, label = 
+             paste('Average Rent for Non-green Buildings: $', ngmean_rent, 
+                   sep="", "/ Square Foot")) + 
+  ylim(0,250)
+
+gmean_rent <- round(mean(eco$Rent), 2)
+```
+```{r}
+ggplot(data = eco, aes(x=cluster_rent, y=Rent)) + 
+  geom_point(color = '#33CC33') + 
+  geom_smooth(se=FALSE, color = '#FF6633') + 
+  labs(
+    x = 'Cluster Rent', 
+    y = 'Rent', 
+    title = 'Rent vs. Cluster Rent on Green Buildings') +
+  annotate("text", x = 30, y = 200, label = 
+             paste('Average Rent for Green Buildings: $', gmean_rent, 
+                   sep="", "/ Square Foot")) +
+  ylim(0,250)
+```
+
+In the two plots above, we can see two important details. One being the average rent per sqaure foot of a green building is $1.59 more. The second aspect is that the the slope of the line comparing with green buildings is slighly steeper than the line on the non-green buildings plot. This demonstrates that the developer can charge more from green buildings compared to the average rent of the surrounding area than without a green building. 
+
+```{r}
+subsetted_df <- subset(greenbuildings, leasing_rate > 10)
+ggplot(data = subsetted_df, aes(x=cluster_rent, y=Rent, color = green_rating)) + 
+  geom_point() +
+  labs(x = 'Cluster Rent', 
+    y = 'Rent', 
+    title = 'Rent vs. Cluster Rent') +
+  xlim(25,35) +
+  scale_colour_gradient(low = 'black', high = 'green')
+```
+
+The plot seen above is a representation of green and non-green buildings' rent when compared to cluster rent. As seen above, the green buildings tend to be at the top of for each cluster rent price.
+
+```{r}
+number_of_non_eco <- length(non_eco[,1])
+number_of_eco <- length(eco[,1])
+number_of_buildings <- length(subset(greenbuildings, leasing_rate > 10) [,1])
+
+leasing_rate_eco <- length(subset(eco, leasing_rate >= 90)[,1])
+leasing_rate_non_eco <- length(subset(non_eco, leasing_rate >= 90)[,1])
+
+eco_pro <- (leasing_rate_eco/number_of_eco)*100
+paste('Proportion of Green Buildings with high leasing rates: ', sep = '', round(eco_pro,2), '%')
+non_eco_pro <- (leasing_rate_non_eco/number_of_non_eco)*100
+paste('Proportion of Non-Green Buildings with high leasing rates: ', sep = '', round(non_eco_pro, 2), '%')
+```
+An issue that wasn't discussed in the Stats Gurus analysis was the question about leasing rates. Fortunately, as seen by the numbers above, green buildings also have a larger proportion of higher leasing rates. This provides significant detail about how successful a green building is likely to lease out their space.
+
+```{r}
+ggplot(greenbuildings, aes(x=factor(green_rating), y=age)) + 
+  geom_boxplot(outlier.colour="blue", outlier.shape=5) + 
+  labs(x = 'Green Rating',
+       y = 'Age of Building',
+       title = 'Age of Green Buildings vs. Non-Green Buildings'
+  )
+```
+
+Detailed above is a boxplot, which measures the age of green buildings compared to age of non-green buildings. Age might be a significant compounding variable when it comes to why average rent is higher, average cluster rent is higher, and leasing rates are higher. Putting the age in perspective demonstrates that green buildings tend to be much younger than non-green buildings thus leading to these other factors. 
+
+```{r}
+age_15 <- subset(greenbuildings, age < 15)
+ggplot(age_15, aes(x=factor(green_rating), y=leasing_rate)) + 
+  geom_boxplot(outlier.colour="blue", outlier.shape=5) + 
+  labs(x = 'Green Rating',
+       y = 'Leasing Rate',
+       title = 'Leasing Rate of Green Buildings vs. Non-Green Buildings')
+```
+Finally, after subsetting the data to buildings that are less than 15 years old, we find that green buildings continue to have a higher and more concise range of leasing rates. This is essential in understanding the success of a building in terms of a landlord. Yes, you can always charge more for rent, but even when matched up by age with non-green buildings, green buildings continue to perform beter with leasing rates.
+
+
+**Question 2**
+```{r}
+abia <- read.csv('ABIA.csv')
+time1 = paste(abia$Year, sep = "-", abia$Month, abia$DayofMonth)
+time1 = as.Date(time1)
+abia$date = time1
+```
+```{r}
+library(dplyr)
+library(plotly)
+df1 = abia %>%
+  group_by(date) %>%
+  summarize(count=n())
+
+names(df1)[names(df1) == "date"] <- "Date"
+names(df1)[names(df1) == "count"] <- "Count"
+
+line_graph <- ggplot(df1, aes(x = Date, y = Count, group = 1)) + 
+  geom_line() + 
+  labs(
+    x='Date',
+    y='Number of Flights',
+    title='Number of Flights Per Day (ABIA)'
+  ) + 
+  geom_hline(yintercept = mean(df1$Count), color = 'red')
+
+ggplotly(line_graph)
+```
+
+This plot is a visual representation of the amount of flights in and out of ABIA per day over the course of 2008.
+```{r}
+df2 = abia %>%
+  group_by(date, DayOfWeek) %>%
+  summarize(count=n())
+
+df3 = df2 %>%
+  group_by(DayOfWeek) %>%
+  summarize(avg = mean(count))
+```
+```{r}
+ggplot(df3, aes(x=DayOfWeek, y=avg)) + 
+  geom_line(color = 'red') +
+  labs(
+    x='Day of the Week',
+    y='Average Amount of Flights',
+    title='What Happens on Saturday?'
+  ) +
+  ylim(200,300) + 
+  scale_x_continuous(breaks=c(1,2,3,4,5,6,7), labels=c('Monday','Tuesday','Wednesday', 'Thursday', 'Friday','Saturday','Sunday'))
+```
+
+The plot above reveals a significant drop in flights on Saturdays when compared to all other days of the week.
+
+```{r}
+df4 = abia %>%
+  group_by(DayOfWeek) %>%
+  summarize(avg = mean(Distance))
+
+ggplot(df4, aes(x=DayOfWeek, y=avg)) + 
+  geom_line(color = 'blue', size = 2, alpha = 0.9, linetype =  5) + 
+  ylim(675, 775) + 
+  labs(
+    x='Day of the Week',
+    y='Average Distance of Flights',
+    title='Longer Flights on Saturday'
+  ) +
+  scale_x_continuous(breaks=c(1,2,3,4,5,6,7), labels=c('Monday','Tuesday','Wednesday', 'Thursday','Friday','Saturday','Sunday'))
+```
+
+The line graph above demonstrates that flights coming in and out of ABIA have a larger distance on average. Perhaps, ABIA has less flights on Saturday because many of those flights travel further. 
+
+
+**Question 3**
+```{r include = FALSE}
+library(quantmod)
+mystocks_value = c("IWS", "RPV", "DVY", "VLUE")
+getSymbols(mystocks_value)
+
+myprices_value = getSymbols(mystocks_value, from = "2015-01-01")
+```
+```{r include = FALSE}
+for(ticker in mystocks_value) {
+	expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+	eval(parse(text=expr))
+}
+all_returns_value = cbind(ClCl(IWSa),
+								ClCl(RPVa),
+								ClCl(DVYa),
+								ClCl(VLUEa))
+```
+```{r}
+set.seed(12345)
+
+all_returns_value = as.matrix(na.omit(all_returns_value))
+
+total_wealth = 100000
+weights = c(0.25, 0.25, 0.25, 0.25)
+holdings = weights * total_wealth
+n_days = 20
+wealthtracker_value = rep(0, n_days)
+for(today in 1:n_days) {
+	return.today = resample(all_returns_value, 1, orig.ids=FALSE)
+	holdings = holdings + holdings * return.today
+	total_wealth = sum(holdings)
+	wealthtracker_value[today] = total_wealth
+	holdings = weights * total_wealth
+}
+wealthtracker_value
+```
+```{r include = FALSE}
+mystocks_growth = c("SPY", "IVV", "VOO", "IWF", "QQQ", "SCHG", "FTCS")
+getSymbols(mystocks_growth)
+
+myprices_growth = getSymbols(mystocks_growth, from = "2015-01-01")
+```
+```{r include = FALSE}
+for(ticker in mystocks_growth) {
+	expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+	eval(parse(text=expr))
+}
+all_returns_growth = cbind(ClCl(SPYa),
+								ClCl(IVVa),
+								ClCl(VOOa),
+								ClCl(IWFa),
+								ClCl(QQQa),
+								ClCl(SCHGa),
+								ClCl(FTCSa))
+```
+```{r}
+set.seed(12345)
+
+all_returns_growth = as.matrix(na.omit(all_returns_growth))
+
+total_wealth = 100000
+weights = c(.142857142857,.142857142857,.142857142857,.142857142857,.142857142857,.142857142857,.142857142857)
+holdings = weights * total_wealth
+n_days = 20
+wealthtracker_growth = rep(0, n_days)
+for(today in 1:n_days) {
+	return.today = resample(all_returns_growth, 1, orig.ids=FALSE)
+	holdings = holdings + holdings * return.today
+	total_wealth = sum(holdings)
+	wealthtracker_growth[today] = total_wealth
+	holdings = weights * total_wealth
+}
+wealthtracker_growth
+```
+
+```{r include = FALSE}
+mystocks_diverse = c("VEA", "VUG", "PWV", "IWM", "IWN", "SCHC")
+getSymbols(mystocks_diverse)
+
+myprices_diverse = getSymbols(mystocks_diverse, from = "2015-01-01")
+```
+```{r include = FALSE}
+for(ticker in mystocks_diverse) {
+	expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+	eval(parse(text=expr))
+}
+all_returns_diverse = cbind(ClCl(VEAa),
+								ClCl(VUGa),
+								ClCl(DVYa),
+								ClCl(IWMa),
+								ClCl(IWNa),
+								ClCl(SCHCa))
+```
+```{r}
+set.seed(12345)
+
+all_returns_diverse = as.matrix(na.omit(all_returns_diverse))
+
+total_wealth = 100000
+weights = c(.1666666667,.1666666667,.1666666667,.1666666667,.1666666667,.1666666667)
+holdings = weights * total_wealth
+n_days = 20
+wealthtracker_diverse = rep(0, n_days)
+for(today in 1:n_days) {
+	return.today = resample(all_returns_diverse, 1, orig.ids=FALSE)
+	holdings = holdings + holdings * return.today
+	total_wealth = sum(holdings)
+	wealthtracker_diverse[today] = total_wealth
+	holdings = weights * total_wealth
+}
+wealthtracker_diverse <- as.matrix(wealthtracker_diverse)
+wealthtracker_diverse
+#VaR(dist = wealthtracker_diverse, x = 0.95)
+```
