@@ -107,6 +107,7 @@ Finally, after subsetting the data to buildings that are less than 15 years old,
 
 **Question 2**
 ```{r}
+rm(list=ls())
 abia <- read.csv('../data/ABIA.csv')
 time1 = paste(abia$Year, sep = "-", abia$Month, abia$DayofMonth)
 time1 = as.Date(time1)
@@ -179,6 +180,7 @@ The line graph above demonstrates that flights coming in and out of ABIA have a 
 For the sake of this problem, the three different ETF possibilities we chose were a value, growth, and diversified portfolio. This is a good mix to analyze because typically, there is a tradeoff between value and growth ETF's based on the risk you are willing to take. Growth ETF's such Facebook and Amazon can yield higher returns but could also cause increased volatility. In contrast, value ETF's can provide a certain level of stability that may not be as available with growth. The final portfolio we chose was diversified with multiple different stocks. This was used as initial experimentation to assess whether diversified ETF's could yield better returns. To begin this report, we have illustrated histograms of returns for these ETF groups as well as the mean profit/loss and Value at Risk (VAR)
 
 ```{r include = FALSE}
+rm(list=ls())
 library(quantmod)
 mystocks_value = c("IWS", "RPV", "DVY", "VLUE")
 getSymbols(mystocks_value)
@@ -353,6 +355,7 @@ In this case, the results point favorably to the Growth portfolio we created. Th
 ## Question 4
 
 ```{r include = FALSE}
+rm(list=ls())
 library(ggplot2)
 library(LICORS)  # for kmeans++
 library(foreach)
@@ -679,6 +682,7 @@ cat('KNN Model gives us an accruacy rate of', c50_knn_accuracy)
 ## Question 6
 
 ```{r include = FALSE}
+rm(list=ls())
 library(tidyverse)
 library(arules)
 # has a big ecosystem of packages built around it
