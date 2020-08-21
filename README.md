@@ -1,8 +1,4 @@
----
-output:
-  pdf_document: default
-  html_document: default
----
+
 # STA 380, Part 2: Exercises 
 
 Due: by end of the day (5:00 PM US Central time) on Monday, August 17.
