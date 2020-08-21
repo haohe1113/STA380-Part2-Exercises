@@ -1,4 +1,4 @@
-# Data Science Mini Projects
+# STA 380 Exercise Projects
 
 ## Contents
 1. [Green Buildings](https://github.com/sahanasub/Data-Science-Mini-Projects/tree/master/Green%20Buildings)
